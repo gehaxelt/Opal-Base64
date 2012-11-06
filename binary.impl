@@ -1,0 +1,39 @@
+IMPLEMENTATION binary
+
+IMPORT Nat COMPLETELY
+IMPORT NatConv COMPLETELY
+IMPORT Denotation COMPLETELY
+
+-- Converts a binary denotation into a nat
+-- @param: binary denotation ( e.g. "0101")
+-- @return: binarys nat representation
+DEF binToNat == \\ binstr.
+	binToNatHelper(binstr,0)
+
+-- Converts a number (nat) into a binary denotation
+-- @param: Number (nat)
+-- @return: Binary representation as a denotation
+DEF natToBin == \\ num.
+	natToBinHelper(num,"")
+
+FUN natToBinHelper : nat ** denotation -> denotation
+DEF natToBinHelper == \\ num, binstr.
+	
+	IF (num ) = 1 THEN
+		"1"++binstr
+	ELSE
+		natToBinHelper( (num / 2) , ((`(num % 2)) ++ binstr) )	
+	FI
+
+-- Helper function for binToNat; Recursion
+FUN binToNatHelper : denotation ** nat -> nat
+DEF binToNatHelper == \\ binstr, exponent.
+	IF #(binstr) > 0 THEN
+		LET	
+			binnum==(!(slice(binstr,#(binstr)-1,#(binstr)-1)))
+			faktor==(pow(2,exponent))
+		IN
+			binnum*faktor + binToNatHelper(delete(binstr,#(binstr)-1,#(binstr)-1),exponent+1)
+	ELSE
+		0
+	FI

@@ -1,0 +1,247 @@
+IMPLEMENTATION base64
+
+IMPORT Denotation COMPLETELY
+IMPORT Nat COMPLETELY
+IMPORT binary COMPLETELY
+IMPORT Char COMPLETELY
+IMPORT NatConv COMPLETELY
+IMPORT CharConv COMPLETELY
+IMPORT ascii COMPLETELY
+
+-- Encode a denotation into base64
+DEF base64encode == \\ str.
+	base64RekEncodeChiffre(base64EncodeAddPadding(base64RekEncodeBitStr(str),str),"")
+
+--  Decode a base64 chiffre
+DEF base64decode == \\ str.
+	base64RekDecodeChiffre(base64RekDecodeBitStr(str,""),"")
+
+-- Converts the binary string into 2byte brackets and the corresponding char
+-- @param: binary string
+-- @param: clrtext for recursion
+-- @return: denotation 
+FUN base64RekDecodeChiffre : denotation ** denotation -> denotation
+DEF base64RekDecodeChiffre == \\ binstr, clrtext.
+	IF ( #(binstr) > 0 ) THEN
+		base64RekDecodeChiffre( delete(binstr,0,7), clrtext ++ %(natToChar(binToNat(slice(binstr,0,7)))))
+	ELSE
+		clrtext
+	FI
+
+-- Convert the base64 input into the corresponding binary string
+-- @param: chiffre
+-- @param: binstr for rekursion
+-- @return: binary string
+FUN base64RekDecodeBitStr : denotation ** denotation -> denotation
+DEF base64RekDecodeBitStr == \\ chfr, binstr.
+	IF #(chfr) > 0 THEN
+		IF ( slice(chfr,0,0) = "=" ) THEN
+			base64RekDecodeBitStr( delete(chfr,0,0), binstr)	
+		ELSE
+			base64RekDecodeBitStr(delete(chfr,0,0), binstr ++ base64AddNull(natToBin(base64CharToNat(slice(chfr,0,0))),6))
+		FI
+	ELSE
+		binstr
+	FI
+	
+
+-- Makes the last step of the encoding
+-- Splits the binary string into 6 bit brackets and creats the base64-chiffre
+FUN base64RekEncodeChiffre : denotation ** denotation -> denotation
+DEF base64RekEncodeChiffre == \\binstr, base64str.
+	IF #(binstr) > 0 THEN
+		IF ( slice(binstr,0,5) = "000000" ) THEN 
+			base64RekEncodeChiffre( delete(binstr,0,5), (base64str ++ "="))
+		ELSE
+			base64RekEncodeChiffre( delete(binstr,0,5), (base64str ++ base64NatToChar(binToNat(slice(binstr,0,5)))))
+		FI
+	ELSE
+		base64str
+	FI
+
+-- Adds the padding of "00000000" to the end of the input, until its length % 3 equals 0
+-- @param: bitstr, to which the padding will be append
+-- @param: str, of which bitstr is the binary representation
+FUN base64EncodeAddPadding : denotation ** denotation -> denotation
+DEF base64EncodeAddPadding == \\ binstr, str.
+	IF ( #(str) % 3) = 0  THEN 
+		binstr
+	ELSE
+		base64EncodeAddPadding(binstr++"00000000", str++"0")	
+	FI
+
+-- Creates the binary base64 representation of the input
+-- @param: Denotation, which will be encoded
+-- @return: Binary denotation 
+FUN base64RekEncodeBitStr : denotation -> denotation
+DEF base64RekEncodeBitStr == \\ str.
+	IF #(str) >= 1 THEN
+		base64AddNull(natToBin(charToNat(!(slice(str,0,0),0))),8)++base64RekEncodeBitStr(delete(str,0,0))
+	ELSE
+		""
+	FI
+
+-- Add zeros to the beginning of a encoding bracket, so it will fit a size of upto bit
+-- @param: binary bracket < upto bit
+-- @param: length of the binary string
+-- @return: upto bit long binary denotation
+FUN base64AddNull : denotation ** nat -> denotation
+DEF base64AddNull == \\ str, upto.
+	IF #(str) = upto THEN str
+	ELSE
+		base64AddNull("0" ++ str,upto)
+	FI
+
+-- Base64 alphabet
+-- Converts a char into its representation as a number
+-- @param: char as denotation
+-- @return: numeric representation
+FUN base64CharToNat : denotation -> nat
+DEF base64CharToNat == \\ str.
+	IF #(str) > 1 THEN
+		0
+	ELSE
+		IF str = "A" THEN 0
+		IF str = "B" THEN 1
+		IF str = "C" THEN 2
+		IF str = "D" THEN 3
+                IF str = "E" THEN 4
+                IF str = "F" THEN 5
+                IF str = "G" THEN 6
+                IF str = "H" THEN 7
+                IF str = "I" THEN 8
+                IF str = "J" THEN 9
+                IF str = "K" THEN 10
+                IF str = "L" THEN 11
+                IF str = "M" THEN 12
+                IF str = "N" THEN 13
+                IF str = "O" THEN 14
+                IF str = "P" THEN 15
+                IF str = "Q" THEN 16
+                IF str = "R" THEN 17
+                IF str = "S" THEN 18
+                IF str = "T" THEN 19
+                IF str = "U" THEN 20
+                IF str = "V" THEN 21
+                IF str = "W" THEN 22
+                IF str = "X" THEN 23
+                IF str = "Y" THEN 24
+                IF str = "Z" THEN 25
+                IF str = "a" THEN 26
+                IF str = "b" THEN 27
+                IF str = "c" THEN 28
+                IF str = "d" THEN 29
+                IF str = "e" THEN 30
+                IF str = "f" THEN 31
+                IF str = "g" THEN 32
+                IF str = "h" THEN !"33"
+                IF str = "i" THEN !"34"
+                IF str = "j" THEN !"35"
+                IF str = "k" THEN !"36"
+                IF str = "l" THEN !"37"
+                IF str = "m" THEN !"38"
+                IF str = "n" THEN !"39"
+                IF str = "o" THEN !"40"
+                IF str = "p" THEN !"41"
+                IF str = "q" THEN !"42"
+                IF str = "r" THEN !"43"
+                IF str = "s" THEN !"44"
+                IF str = "t" THEN !"45"
+                IF str = "u" THEN !"46"
+                IF str = "v" THEN !"47"
+                IF str = "w" THEN !"48"
+                IF str = "x" THEN !"49"
+                IF str = "y" THEN !"50"
+                IF str = "z" THEN !"51"
+                IF str = "0" THEN !"52"
+                IF str = "1" THEN !"53"
+                IF str = "2" THEN !"54"
+                IF str = "3" THEN !"55"
+                IF str = "4" THEN !"56"
+                IF str = "5" THEN !"57"
+                IF str = "6" THEN !"58"
+                IF str = "7" THEN !"59"
+                IF str = "8" THEN !"60"
+                IF str = "9" THEN !"61"
+                IF str = "+" THEN !"62"
+                IF str = "\\" THEN !"63"		
+		ELSE
+			0
+		FI
+	FI
+
+-- Base64 alphabet
+-- Converts a number into the representation as a char
+-- @param: Index
+-- @return:  Char as denotation
+FUN base64NatToChar : nat -> denotation
+DEF base64NatToChar == \\ num.
+	IF num <= !"63" and num >= 0 THEN
+		IF num = 0 THEN !"A"
+		IF num = 1 THEN !"B"
+                IF num = 2 THEN !"C"
+                IF num = 3 THEN !"D"
+                IF num = 4 THEN !"E"
+                IF num = 5 THEN !"F"
+                IF num = 6 THEN !"G"
+                IF num = 7 THEN !"H"
+                IF num = 8 THEN !"I"
+                IF num = 9 THEN !"J"
+                IF num = 10 THEN !"K"
+                IF num = 11 THEN !"L"
+                IF num = 12 THEN !"M"
+                IF num = 13 THEN !"N"
+                IF num = 14 THEN !"O"
+                IF num = 15 THEN !"P"
+                IF num = 16 THEN !"Q"
+                IF num = 17 THEN !"R"
+                IF num = 18 THEN !"S"
+                IF num = 19 THEN !"T"
+                IF num = 20 THEN !"U"
+                IF num = 21 THEN !"V"
+                IF num = 22 THEN !"W"
+                IF num = 23 THEN !"X"
+                IF num = 24 THEN !"Y"
+                IF num = 25 THEN !"Z"
+                IF num = 26 THEN !"a"
+                IF num = 27 THEN !"b"
+                IF num = 28 THEN !"c"
+                IF num = 29 THEN !"d"
+                IF num = 30 THEN !"e"
+                IF num = 31 THEN !"f"
+                IF num = 32 THEN !"g"
+                IF num = !"33" THEN !"h"
+                IF num = !"34" THEN !"i"
+                IF num = !"35" THEN !"j"
+                IF num = !"36" THEN !"k"
+                IF num = !"37" THEN !"l"
+                IF num = !"38" THEN !"m"
+                IF num = !"39" THEN !"n"
+                IF num = !"40" THEN !"o"
+                IF num = !"41" THEN !"p"
+                IF num = !"42" THEN !"q"
+                IF num = !"43" THEN !"r"
+                IF num = !"44" THEN !"s"
+                IF num = !"45" THEN !"t"
+                IF num = !"46" THEN !"u"
+                IF num = !"47" THEN !"v"
+                IF num = !"48" THEN !"w"
+                IF num = !"49" THEN !"x"
+                IF num = !"50" THEN !"y"
+                IF num = !"51" THEN !"z"
+                IF num = !"52" THEN !"0"
+                IF num = !"53" THEN !"1"
+                IF num = !"54" THEN !"2"
+                IF num = !"55" THEN !"3"
+                IF num = !"56" THEN !"4"
+                IF num = !"57" THEN !"5"
+                IF num = !"58" THEN !"6"
+                IF num = !"59" THEN !"7"
+                IF num = !"60" THEN !"8"
+                IF num = !"61" THEN !"9"
+                IF num = !"62" THEN !"+"
+                IF num = !"63" THEN !"\\"		
+		FI
+	ELSE
+		!" "
+	FI 

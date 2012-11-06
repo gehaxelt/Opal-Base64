@@ -1,0 +1,7 @@
+SIGNATURE base64
+
+IMPORT Denotation ONLY denotation
+
+FUN base64encode : denotation -> denotation
+
+FUN base64decode : denotation -> denotation
